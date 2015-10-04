@@ -20,7 +20,7 @@ tumblrTile || (function() {
     var config    = configStr ? JSON.parse(configStr) : {};
 
     var defaultConfig = {
-      hostname : "aoi-miyazaki.tumblr.com",
+      tag : "二階堂ふみ",
       baseWidth: 250,
       margin   : 10
     };
@@ -41,15 +41,17 @@ tumblrTile || (function() {
     var param = {
       limit : 20,
       offset: 0,
+      before: ''
     };
 
     var isAccessTumblr = false;
 
     self.getTumblrPhotos(param, function(div) {
       $("#container").append($(div));
-    }).then(function() {
+    }).then(function(timestamp) {
 
       param.offset += param.limit;
+      param.before = timestamp;
 
       $("#container").masonry({
         itemSelector: ".item",
@@ -66,8 +68,8 @@ tumblrTile || (function() {
 
           self.getTumblrPhotos(param, function(div) {
             divs += div;
-          }).then(function() {
-
+          }).then(function(timestamp) {
+            param.before = timestamp;
             param.offset += param.limit;
 
             var $divs = $(divs);
@@ -84,15 +86,16 @@ tumblrTile || (function() {
   function getTumblrPhotos(param, func) {
 
     var self = this;
+    var timestamp = '';
     var d = $.Deferred();
     param.api_key = self.config.apiKey;
 
     $.getJSON(
-      "https://api.tumblr.com/v2/blog/" + self.config.hostname + "/posts/photo",
+      "https://api.tumblr.com/v2/tagged?tag="+encodeURIComponent(self.config.tag),
       param,
       function(json) {
 
-        json.response.posts.forEach(function(val, index, array) {
+        json.response.forEach(function(val, index, array) {
           if ( ! val.photos ) {
             return 1;
           }
@@ -116,9 +119,10 @@ tumblrTile || (function() {
 
           var altSize = val.photos[0].alt_sizes[diffSizes[0].index]
           var div = '<div class="item"><a href="' + val.post_url + '"><img src="' + altSize.url+ '" width="' + altSize.width + '" height="' + altSize.height + '" /></a></div>';
+          timestamp = val.timestamp
           func(div);
         });
-        d.resolve();
+        d.resolve(timestamp);
       });
       return d;
   }
