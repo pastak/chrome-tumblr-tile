@@ -118,7 +118,7 @@ tumblrTile || (function() {
           });
 
           var altSize = val.photos[0].alt_sizes[diffSizes[0].index]
-          var div = '<div class="item"><a href="' + val.post_url + '"><img src="' + altSize.url+ '" width="' + altSize.width + '" height="' + altSize.height + '" /></a></div>';
+          var div = '<div class="item"><a target="_blank" href="' + val.post_url + '"><img src="' + altSize.url+ '" width="' + altSize.width + '" height="' + altSize.height + '" /></a></div>';
           timestamp = val.timestamp
           func(div);
         });
